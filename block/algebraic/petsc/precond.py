@@ -149,12 +149,22 @@ class LU(precond):
                          pdes=1, nullspace=None, options=parameters, prefix=prefix,
                          defaults=defaults)
 
+
+class UMFPACK_LU(LU):
+    def __init__(self, A, parameters=None, prefix=None):
+        super().__init__(A,
+                         parameters=parameters, prefix=prefix,
+                         defaults={
+                             'pc_factor_mat_solver_type': 'umfpack',
+                         })
+
+        
 class MUMPS_LU(LU):
     def __init__(self, A, parameters=None, prefix=None):
         super().__init__(A,
                          parameters=parameters, prefix=prefix,
                          defaults={
-                             'pc_factor_mat_solver_package': 'mumps',
+                             'pc_factor_mat_solver_type': 'mumps',
                          })
 
 
@@ -163,7 +173,7 @@ class SUPERLU_LU(LU):
         super().__init__(A,
                          parameters=parameters, prefix=prefix,
                          defaults={
-                             'pc_factor_mat_solver_package': 'superlu',
+                             'pc_factor_mat_solver_type': 'superlu',
                          })
         self.petsc_op.setFactorPivot(1E-16)
 

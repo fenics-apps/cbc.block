@@ -2,6 +2,8 @@ from __future__ import division
 from builtins import range
 from .block_base import block_container
 from .block_vec import block_vec
+import numpy as np
+
 
 class block_mat(block_container):
     """Block of matrices or other operators. Empty blocks doesn't need to be set
@@ -18,7 +20,7 @@ class block_mat(block_container):
         block_container.__init__(self, (m,n), blocks)
 
     def matvec(self, x):
-        from dolfin import GenericVector, Matrix, PETScMatrix
+        from dolfin import GenericVector, Matrix, PETScMatrix, PETScVector
         from .block_util import isscalar
         import numpy
         m,n = self.blocks.shape
@@ -45,7 +47,16 @@ class block_mat(block_container):
                     # Do the block multiply
                     if isinstance(self[i,j], PETScMatrix):
                         z = self[i,j].create_vec(dim=0)
-                        self[i,j].mult(x[j], z)
+
+                        if isinstance(x[j], (GenericVector, PETScVector)):
+                            self[i,j].mult(x[j], z)
+                        else:
+                            xx = self.create_vec()
+                            offsets = np.cumsum([0] + [xi.size() for xi in xx])                                                        
+                            xj = xx[j]
+
+                            xj.set_local(x.get_local()[offsets[j]:offsets[j+1]])
+                            self[i, j].mult(xj, z)
                     else:
                         z = self[i,j] * x[j]
                         if isinstance(z, type(NotImplemented)): return NotImplemented

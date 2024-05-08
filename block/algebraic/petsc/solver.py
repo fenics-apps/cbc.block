@@ -104,7 +104,7 @@ class petsc_py_wrapper:
         pass
 
 class petsc_solver(petsc_base):
-    def __init__(self, A, precond, V, ksp_type, prefix, options, defaults={}):
+    def __init__(self, A, precond, V, ksp_type, prefix, options, defaults={}, nullspace=None):
         supports_mpi(False, 'PETSc solver interface currently does not work in parallel')
 
         self.A = A
@@ -122,8 +122,13 @@ class petsc_solver(petsc_base):
 
         self.petsc_op.setComputeEigenvalues(True)
 
+        if nullspace is not None:
+            ns = PETSc.NullSpace().create(vectors=[vec(fi) for fi in nullspace])
+            self.Ad.setNearNullSpace(ns)
         self.petsc_op.setOperators(self.Ad)
+        
         self.petsc_op.setFromOptions()
+        
         if precond is not None:
             pc = self.petsc_op.getPC()
             pc.setType(PETSc.PC.Type.PYTHON)
@@ -166,7 +171,8 @@ class petsc_solver(petsc_base):
         return np.array([])
     
 class KSP(petsc_solver):
-    def __init__(self, A, precond=None, prefix=None, **parameters):
+    def __init__(self, A, precond=None, prefix=None, nullspace=None, **parameters):
         super().__init__(A, precond=precond, V=None, ksp_type=None, prefix=prefix, options=parameters,
+                         nullspace=nullspace,
                          defaults={
                          })
