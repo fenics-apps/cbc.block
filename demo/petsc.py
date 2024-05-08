@@ -72,10 +72,10 @@ class BoundarySource(UserExpression):
     def value_shape(self):
         return (2,)
 
-bcs = block_bc([
-    [DirichletBC(BDM, BoundarySource(mesh), BoxBoundary(mesh).ns)],
-    None
-], symmetric=True)
+G = BoundarySource(mesh)
+boundary = BoxBoundary(mesh).ns
+bcs_BDM = [DirichletBC(BDM, G, boundary)]
+bcs = block_bc([bcs_BDM, None], symmetric=True)
 
 f = Expression("10*exp(-(pow(x[0] - 0.5, 2) + pow(x[1] - 0.5, 2)) / 0.02)", degree=4)
 
