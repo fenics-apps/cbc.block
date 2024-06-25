@@ -24,7 +24,12 @@ def mat(A, _sizes=None):
                                     for (r,row) in enumerate(A.blocks)])
         if USE_VECNEST:
             m.setVecType(PETSc.Vec.Type.NEST)
+            
         return m
+    
+    elif isinstance(A, (PETScMatrix, Matrix)):
+        return single_mat(A)
+    
     elif isinstance(A, block_base) or np.isscalar(A):
         if not _sizes:
             raise ValueError('Cannot create unsized PETSc matrix')
@@ -36,10 +41,18 @@ def mat(A, _sizes=None):
         Ad.setPythonContext(petsc_py_wrapper(A))
         Ad.setUp()
         return Ad
-    elif isinstance(A, (PETScMatrix, Matrix)):
-        return single_mat(A)
     else:
-        raise TypeError(str(type(A)))
+        try:
+            row_vec, col_vec = A.create_vec(dim=1), A.create_vec(dim=0)
+            _sizes = (row_vec.local_size(), col_vec.local_size())
+            
+            Ad = PETSc.Mat().createPython(_sizes)
+            Ad.setPythonContext(petsc_py_wrapper(A))
+            Ad.setUp()
+            
+            return Ad
+        except:
+            raise TypeError(str(type(A)))
 
 def vec(v):
     if isinstance(v, block_vec):
