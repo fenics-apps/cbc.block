@@ -63,7 +63,7 @@ def block_tensor(obj):
     if isinstance(obj, (block_mat, block_vec)):
         return obj
 
-    from ufl import Form
+    from ufl_legacy import Form
     if isinstance(obj, Form):
         from .splitting import split_form
         obj = split_form(obj)

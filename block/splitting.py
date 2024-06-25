@@ -1,6 +1,6 @@
 from builtins import map
 from builtins import range
-from ufl.corealg.map_dag import MultiFunction
+from ufl_legacy.corealg.map_dag import MultiFunction
 import collections
 SplitForm = collections.namedtuple("SplitForm", ["indices", "form"])
 
@@ -48,7 +48,7 @@ class FormSplitter(MultiFunction):
             (1, 0), q*u*dx))
 
         """
-        from ufl.algorithms.map_integrands import map_integrand_dags
+        from ufl_legacy.algorithms.map_integrands import map_integrand_dags
         from numpy import ndindex
         args = form.arguments()
         if all(a.function_space().num_sub_spaces() == 0 for a in args):
@@ -78,8 +78,8 @@ class FormSplitter(MultiFunction):
        return o
 
     def argument(self, o):
-        from ufl import as_vector
-        from ufl.constantvalue import Zero
+        from ufl_legacy import as_vector
+        from ufl_legacy.constantvalue import Zero
         from dolfin.function.argument import Argument
         from numpy import ndindex
         V = o.function_space()

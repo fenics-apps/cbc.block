@@ -64,10 +64,10 @@ class update(object):
     def _extract_function_space(self, expression, mesh=None):
         """Try to extract a suitable function space for projection of
         given expression. Copied from dolfin/fem/projection.py"""
-        import ufl
+        import ufl_legacy
 
         # Extract functions
-        functions = ufl.algorithms.extract_coefficients(expression)
+        functions = ufl_legacy.algorithms.extract_coefficients(expression)
 
         # Extract mesh from functions
         if mesh is None:
