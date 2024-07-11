@@ -84,8 +84,12 @@ def Vec(v, creator):
             else:
                 return PETScVector(v)
         else:
-            if isinstance(creator, block_container):
+            try:
                 ret = creator.create_vec(dim=1)
+            except:
+                pass
+
+            if isinstance(ret, block_vec):
                 arr = v.getArray()
                 i0 = 0
                 for vv in ret:
