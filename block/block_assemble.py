@@ -70,7 +70,7 @@ def block_assemble(lhs, rhs=None, bcs=None,
         return b
 
     # check if arguments are forms, in which case bcs have to be split
-    from ufl import Form
+    from ufl_legacy import Form
     lhs_bcs = (block_bc.from_mixed if isinstance(lhs, Form) else block_bc)(bcs, symmetric=symmetric, signs=signs)
 
     result = []
@@ -92,7 +92,7 @@ def block_symmetric_assemble(forms, bcs):
 
 def _is_form(form):
     from dolfin import Form as cpp_Form
-    from ufl.form import Form as ufl_Form
+    from ufl_legacy.form import Form as ufl_Form
     return isinstance(form, (cpp_Form, ufl_Form))
 
 def _new_square_matrix(bc, val):

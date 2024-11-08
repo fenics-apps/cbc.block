@@ -87,7 +87,7 @@ def Vec(v, creator):
             try:
                 ret = creator.create_vec(dim=1)
             except:
-                pass
+                ret = None
 
             if isinstance(ret, block_vec):
                 arr = v.getArray()
