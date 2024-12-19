@@ -87,13 +87,12 @@ class block_mat(block_container):
 
         m,n = self.blocks.shape
         y = block_vec(self.blocks.shape[0])
-
         for i in range(n):
             for j in range(m):
                 if self[j,i] is None or self[j,i]==0:
                     # Skip multiply if zero
                     continue
-                if self[i,j] == 1:
+                if self[j,i] == 1:
                     # Skip multiply if identity
                     z = x[j]
                 elif numpy.isscalar(self[j,i]):
