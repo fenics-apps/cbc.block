@@ -121,7 +121,7 @@ class petsc_py_wrapper:
         pass
 
 class petsc_solver(petsc_base):
-    def __init__(self, A, precond, V, ksp_type, prefix, options, defaults={}, nullspace=None):
+    def __init__(self, A, precond, *, V, ksp_type, prefix, options, defaults={}, nullspace=None, initial_guess=None):
         supports_mpi(False, 'PETSc solver interface currently does not work in parallel')
 
         self.A = A
@@ -136,6 +136,7 @@ class petsc_solver(petsc_base):
             
         self.petsc_op.setConvergenceHistory() # Record residuals
         self.residuals = []
+        self.initial_guess = initial_guess
 
         self.petsc_op.setComputeEigenvalues(True)
 
@@ -157,6 +158,17 @@ class petsc_solver(petsc_base):
     def matvec(self, b):
         self.petsc_op.setUp()
         x = self.Ad.createVecLeft()
+        x *= 0
+        
+        if self.initial_guess is not None:
+            if isinstance(self.initial_guess, block_vec):
+                values = np.hstack([yi.get_local() for yi in self.initial_guess])
+                y = PETSc.Vec().createWithArray(values)
+                y.assemble()
+            else:
+                y = self.initial_guess                    
+            x.axpy(1, y)
+                
         self.petsc_op.solve(vec(b), x)
 
         self.residuals = self.petsc_op.getConvergenceHistory()
@@ -188,8 +200,9 @@ class petsc_solver(petsc_base):
         return np.array([])
     
 class KSP(petsc_solver):
-    def __init__(self, A, precond=None, prefix=None, nullspace=None, **parameters):
+    def __init__(self, A, precond=None, prefix=None, nullspace=None, initial_guess=None, **parameters):
         super().__init__(A, precond=precond, V=None, ksp_type=None, prefix=prefix, options=parameters,
+                         initial_guess=initial_guess,
                          nullspace=nullspace,
                          defaults={
                          })
